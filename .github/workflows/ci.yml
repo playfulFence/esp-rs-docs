@@ -13,6 +13,12 @@ jobs:
             chip: [esp32, esp32c2, esp32c3, esp32c6, esp32h2, esp32p4, esp32s2, esp32s3]
 
     steps:
+
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.1
+        with:
+          submodules: true
+
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -23,15 +29,10 @@ jobs:
         run: cargo install espup
 
       - name: Install ESP toolchains
-        run: espup install
+        run: espup install  
 
-      - name: Checkout esp-hal 🛎️
-        uses: actions/checkout@v2.3.1
-        with:
-          repository: 'esp-rs/esp-hal'
-          path: 'esp-hal'
-
-  
+      - name : Clone esp-hal
+        run: git clone git@github.com:esp-rs/esp-hal.git
 
       - name: Build and Clone Documentation for ${{ matrix.chip }}
         run: |       
@@ -70,4 +71,4 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
             branch: docs-ghpage
-            folder: . # The folder the action should deploy.
+            folder: public # The folder the action should deploy.
