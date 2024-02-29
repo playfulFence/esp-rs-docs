@@ -6,38 +6,42 @@ on:
       - main
 
 jobs:
-  setup-environment:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          override: true
-
-      - name: Install espup
-        run: cargo install espup
-
-      - name: Install ESP toolchains
-        run: espup install
-        
   build-deploy:
-    needs: setup-environment
     runs-on: ubuntu-latest
     strategy:
         matrix:
             chip: [esp32, esp32c2, esp32c3, esp32c6, esp32h2, esp32p4, esp32s2, esp32s3]
 
     steps:
+      - name: Install espup
+        run: cargo install espup
+
+      - name: Install ESP toolchains
+        run: espup install
+
       - name: Checkout esp-hal 🛎️
         uses: actions/checkout@v2.3.1
         with:
           repository: 'esp-rs/esp-hal'
           path: 'esp-hal'
 
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+  
+
       - name: Build and Clone Documentation for ${{ matrix.chip }}
         run: |
+        
+
+          if [ "${{ matrix.chip }}" == "esp32" ] || [ "${{ matrix.chip }}" == "esp32s2" ] || [ "${{ matrix.chip }}" == "esp32s3" ]; then
+            cargo +esp xtask build-documentation esp-hal ${{ matrix.chip }}
+          else
+            cargo +nightly xtask build-documentation esp-hal ${{ matrix.chip }}
+          fi 
+          
           if [[ "${{ matrix.chip }}" == "esp32" || "${{ matrix.chip }}" == "esp32s2" || "${{ matrix.chip }}" == "esp32s3" ]]; then
             TARGET="xtensa-${{ matrix.chip }}-none-elf"
           elif [[ "${{ matrix.chip }}" == "esp32c6" || "${{ matrix.chip }}" == "esp32h2" ]]; then
