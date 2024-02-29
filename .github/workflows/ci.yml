@@ -13,6 +13,12 @@ jobs:
             chip: [esp32, esp32c2, esp32c3, esp32c6, esp32h2, esp32p4, esp32s2, esp32s3]
 
     steps:
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            override: true
+
       - name: Install espup
         run: cargo install espup
 
@@ -25,11 +31,6 @@ jobs:
           repository: 'esp-rs/esp-hal'
           path: 'esp-hal'
 
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-            toolchain: nightly
-            override: true
   
 
       - name: Build and Clone Documentation for ${{ matrix.chip }}
@@ -54,11 +55,11 @@ jobs:
 
           DOC_PATH="${{ github.workspace }}/esp-hal/esp-hal/target/${TARGET}/doc/${{ matrix.chip }}"
           TARGET_DIR="${{ github.workspace }}/documentation/${{ matrix.chip }}"
-
+          
           mkdir -p $TARGET_DIR
           cp -r $DOC_PATH/* $TARGET_DIR/
+          cd ${{ github.workspace }}
 
-          cd
 
     #   - name: Install and Build site 🔧
     #     run: |
